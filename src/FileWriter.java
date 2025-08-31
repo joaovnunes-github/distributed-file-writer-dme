@@ -8,34 +8,27 @@ import java.nio.file.StandardOpenOption;
 
 public class FileWriter {
 
-    private final FileAccessManager accessManager;
+    private final DistributedAccessManager accessManager;
 
-    public FileWriter(FileAccessManager accessManager) {
+    public FileWriter(DistributedAccessManager accessManager) {
         this.accessManager = accessManager;
     }
 
     public void write() {
-        accessManager.requestLock();
-        while (!accessManager.hasLockBeenGranted()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
-
         try {
-            Path path = Paths.get("shared_file.txt");
-            Files.write(path, "|".getBytes(), StandardOpenOption.CREATE,
-                        StandardOpenOption.APPEND);
-
-            Files.write(path, ".".getBytes(), StandardOpenOption.CREATE,
-                        StandardOpenOption.APPEND);
-
-            System.out.println("Process wrote |.");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            accessManager.requestLock().thenRunAsync(() -> {
+                try {
+                    System.out.println("Entering critical section.");
+                    Path path = Paths.get("shared_file.txt");
+                    Files.write(path, "|".getBytes(), StandardOpenOption.CREATE,
+                                StandardOpenOption.APPEND);
+                    Files.write(path, ".".getBytes(), StandardOpenOption.CREATE,
+                                StandardOpenOption.APPEND);
+                    System.out.println("Process wrote |.");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).join();
         } finally {
             accessManager.releaseLock();
         }
