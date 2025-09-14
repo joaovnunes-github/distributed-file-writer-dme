@@ -31,14 +31,15 @@ PEER3_PORT=8003
 # Create src directory if it doesn't exist
 mkdir -p src
 
-echo "=== Distributed Mutual Exclusion Process Runner ==="
-echo "Process ID: $PROCESS_ID"
-echo "DME Enabled: $USE_DME"
-echo ""
+# Create out directory if it doesn't exist
+mkdir -p out
 
-# Clean and compile
+# Clean previous class files from out directory
+find out -name '*.class' -delete
+
+# Compile Java source files from src to out
 echo "Compiling Java source..."
-javac -d . src/Process.java
+javac -d out src/*.java
 
 if [ $? -ne 0 ]; then
     echo "Compilation failed!"
@@ -76,4 +77,4 @@ echo "Peer configuration: $PEERS"
 echo ""
 
 # Start the Java process
-java src/Process $PROCESS_ID $USE_DME $PEERS
+java -cp out src/Process $PROCESS_ID $USE_DME $PEERS

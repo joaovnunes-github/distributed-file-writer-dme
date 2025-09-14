@@ -71,6 +71,7 @@ public class NetworkClient {
                     try {
                         String message = reader.readLine();
                         if(message != null) {
+                            System.out.println(message + " <<<<<<<<<<");
                             dispatch(message);
                         }
                     } catch (IOException ignored) {
@@ -94,6 +95,7 @@ public class NetworkClient {
     public void sendMessage(Peer peer, String message) {
         try (Socket socket = new Socket(peer.host, peer.port);
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+            System.out.println(">>>>>>>>>> " + message + " to " + peer.id);
             writer.println(message);
         } catch (IOException e) {
             System.out.println(e.getMessage());

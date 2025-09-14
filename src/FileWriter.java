@@ -14,7 +14,7 @@ public class FileWriter {
         this.accessManager = accessManager;
     }
 
-    public void write() {
+    public void write() throws InterruptedException {
         try {
             accessManager.requestLock().thenRunAsync(() -> {
                 try {
@@ -31,6 +31,7 @@ public class FileWriter {
             }).join();
         } finally {
             accessManager.releaseLock();
+            Thread.sleep(10);
         }
     }
 }

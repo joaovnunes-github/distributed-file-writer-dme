@@ -4,16 +4,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.Consumer;
 
 public class DistributedAccessManager implements Consumer<String> {
 
+    private final LinkedBlockingQueue<Runnable> actionQueue = new LinkedBlockingQueue<>();
+
+    private final NetworkClient networkClient;
+
     private final List<Peer> peers;
 
     private final int id;
-
-    private final NetworkClient networkClient;
 
     private int time = 0;
 
@@ -23,35 +26,50 @@ public class DistributedAccessManager implements Consumer<String> {
 
     private CompletableFuture<Void> pendingLockRequest;
 
+    private boolean isInCriticalSection = false;
+
     public DistributedAccessManager(DistributedAccessConfiguration config,
                                     NetworkClient networkClient) {
         this.networkClient = networkClient;
         this.peers = config.getPeers();
         this.id = config.getProcessID();
+
+        Thread workerThread = new Thread(() -> {
+            try {
+                while (true) {
+                    Runnable action = actionQueue.take();
+                    action.run();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        workerThread.setDaemon(true);
+        workerThread.start();
     }
 
     public CompletableFuture<Void> requestLock() {
-        if(pendingLockRequest != null) {
-            System.out.println("Tried to request lock with pending request");
-            return null;
-        }
+        var future = new CompletableFuture<Void>();
 
-        Request request = new Request(time, id);
-        requests.add(request);
+        actionQueue.offer(() -> {
+            time++;
 
-        System.out.println("Process " + id + " requesting lock at time " + time);
+            Request request = new Request(time, id);
+            requests.add(request);
 
-        for(Peer peer : peers) {
-            networkClient.sendMessage(peer, "REQUEST " + time + " " + id);
-        }
+            for(Peer peer : peers) {
+                networkClient.sendMessage(peer, "REQUEST " + time + " " + id);
+            }
 
-        pendingLockRequest = new CompletableFuture<>();
-        return pendingLockRequest;
+            pendingLockRequest = future;
+        });
+
+        return future;
     }
 
     @Override
     public void accept(String message) {
-        processMessage(message);
+        actionQueue.offer(() -> processMessage(message));
     }
 
     private void processMessage(String message) {
@@ -60,38 +78,29 @@ public class DistributedAccessManager implements Consumer<String> {
         int senderTime = Integer.parseInt(parts[1]);
         int senderID = Integer.parseInt(parts[2]);
 
-        System.out.println("Process " + id + " received " + type + " from " + senderID);
-
         time = Math.max(time, senderTime) + 1;
 
         switch (type) {
             case "REQUEST":
                 requests.add(new Request(senderTime, senderID));
 
+                var requestWithLowestTime = requests.peek();
+                if(isInCriticalSection || (requestWithLowestTime != null && isThisRequestMine(
+                    requestWithLowestTime))) {
+                    return;
+                }
+
+                requests.removeIf((request -> request.processID == senderID));
                 peers.stream().filter(p -> p.id == senderID).findFirst().ifPresent(
                     sender -> networkClient.sendMessage(sender, "REPLY " + time + " " + id));
                 return;
 
             case "REPLY":
                 replies.add(senderID);
-                System.out.println(
-                    "Process " + id + " received reply from " + senderID + " (" + replies.size() + "/" + peers.size() + ")");
-                if(shouldGrantLock()) {
-                    if(pendingLockRequest != null && !pendingLockRequest.isDone()) {
-                        pendingLockRequest.complete(null);
-                    }
-                }
-                break;
 
-            case "RELEASE":
-                requests.removeIf(r -> r.processID == senderID);
                 if(shouldGrantLock()) {
-                    if(pendingLockRequest != null && !pendingLockRequest.isDone()) {
-                        System.out.println("Process " + id + " lock granted");
-                        replies.clear();
-                        time++;
-                        pendingLockRequest.complete(null);
-                    }
+                    isInCriticalSection = true;
+                    pendingLockRequest.complete(null);
                 }
                 break;
         }
@@ -106,26 +115,27 @@ public class DistributedAccessManager implements Consumer<String> {
         return isThisRequestMine(nextRequestToBeProcessed) && allPeersHaveReplied();
     }
 
-    private boolean allPeersHaveReplied() {
-        return replies.size() >= peers.size();
-    }
-
     private boolean isThisRequestMine(Request nextRequestToBeProcessed) {
         return nextRequestToBeProcessed.processID == id;
     }
 
+    private boolean allPeersHaveReplied() {
+        return replies.size() >= peers.size();
+    }
+
     public void releaseLock() {
-        requests.removeIf(this::isThisRequestMine);
+        actionQueue.offer(() -> {
+            requests.removeIf(this::isThisRequestMine);
+            replies.clear();
+            isInCriticalSection = false;
+            pendingLockRequest = null;
+            time++;
 
-        time++;
-        for(Peer peer : peers) {
-            System.out.println("Process " + id + " sending RELEASE to " + peer.id);
-            networkClient.sendMessage(peer, "RELEASE " + time + " " + id);
-        }
-
-        System.out.println("Process " + id + " released lock");
-
-        replies.clear();
-        pendingLockRequest = null;
+            for(Request request : requests.toArray(new Request[0])) {
+                requests.remove(request);
+                peers.stream().filter((p) -> p.id == request.processID).findFirst().ifPresent(
+                    peer -> networkClient.sendMessage(peer, "REPLY " + time + " " + id));
+            }
+        });
     }
 }
