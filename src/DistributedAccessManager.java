@@ -26,7 +26,7 @@ public class DistributedAccessManager implements Consumer<String> {
 
     private final PriorityBlockingQueue<Request> requests = new PriorityBlockingQueue<>();
 
-    private final Set<Integer> replies = new HashSet<>();
+    private Set<Integer> pendingReplies = new HashSet<>();
 
     private CompletableFuture<Void> pendingLockRequest;
 
@@ -82,11 +82,12 @@ public class DistributedAccessManager implements Consumer<String> {
 
         actionQueue.offer(() -> {
             time++;
-
             Request request = new Request(time, ID);
             requests.add(request);
 
+            pendingReplies = new HashSet<>();
             for(Peer peer : peers) {
+                pendingReplies.add(peer.id);
                 networkClient.sendMessage(peer, "REQUEST " + time + " " + ID);
             }
 
@@ -132,7 +133,7 @@ public class DistributedAccessManager implements Consumer<String> {
                 break;
 
             case "REPLY":
-                replies.add(senderID);
+                pendingReplies.remove(senderID);
 
                 if(shouldGrantLock()) {
                     isInCriticalSection = true;
@@ -189,7 +190,7 @@ public class DistributedAccessManager implements Consumer<String> {
 
         snapshotLocalTime = time;
         snapshotRequests = new ArrayList<>(requests);
-        snapshotReplies = new HashSet<>(replies);
+        snapshotReplies = new HashSet<>(pendingReplies);
         snapshotIsInCritical = isInCriticalSection;
         snapshotWantsCritical = pendingLockRequest != null && !pendingLockRequest.isDone();
         collectedSnapshots.clear();
@@ -228,11 +229,10 @@ public class DistributedAccessManager implements Consumer<String> {
         for(int i = 0; i < snapshotRequests.size(); i++) {
             Request r = snapshotRequests.get(i);
             if(i > 0) {sb.append(",");}
-            sb.append("{\"time\":").append(r.timestamp).append(",\"processID\":")
-              .append(r.processID).append("}");
+            sb.append(r.processID);
         }
         sb.append("],");
-        sb.append("\"repliesThisProcessReceived\":[");
+        sb.append("\"repliesThisProcessIsWaitingOn\":[");
         int j = 0;
         for(Integer r : snapshotReplies) {
             if(j++ > 0) {sb.append(",");}
@@ -265,7 +265,6 @@ public class DistributedAccessManager implements Consumer<String> {
         if(nextRequestToBeProcessed == null) {
             return false;
         }
-
         return isThisRequestMine(nextRequestToBeProcessed) && allPeersHaveReplied();
     }
 
@@ -274,13 +273,12 @@ public class DistributedAccessManager implements Consumer<String> {
     }
 
     private boolean allPeersHaveReplied() {
-        return replies.size() >= peers.size();
+        return pendingReplies.isEmpty();
     }
 
     public void releaseLock() {
         actionQueue.offer(() -> {
             requests.removeIf(this::isThisRequestMine);
-            replies.clear();
             isInCriticalSection = false;
             pendingLockRequest = null;
             time++;

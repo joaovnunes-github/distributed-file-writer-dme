@@ -1,51 +1,41 @@
 {
   "snapshot": {
     "1": {
-      "time": 342,
+      "time": 1119,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [],
-      "repliesThisProcessIsWaitingOn": [
-        2,
-        3
-      ],
+      "repliesThisProcessIsWaitingOn": [],
       "messagesThatWereInTransit": {
         "2": [
-          "REPLY 344 2",
-          "REQUEST 345 2"
+          "REPLY 1121 2"
         ],
         "3": []
       }
     },
     "2": {
-      "time": 346,
+      "time": 1122,
       "isInCriticalSection": false,
-      "wantsCriticalSection": true,
+      "wantsCriticalSection": false,
       "requestsThisProcessMustReplyTo": [],
-      "repliesThisProcessIsWaitingOn": [
-        1,
-        3
-      ],
+      "repliesThisProcessIsWaitingOn": [],
       "messagesThatWereInTransit": {
         "1": [],
         "3": []
       }
     },
     "3": {
-      "time": 344,
+      "time": 1121,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [
         1
       ],
-      "repliesThisProcessIsWaitingOn": [
-        2
-      ],
+      "repliesThisProcessIsWaitingOn": [],
       "messagesThatWereInTransit": {
         "1": [],
         "2": [
-          "REPLY 344 2",
-          "REQUEST 345 2"
+          "REPLY 1121 2"
         ]
       }
     }

@@ -1,48 +1,46 @@
 {
   "snapshot": {
     "1": {
-      "time": 469,
+      "time": 451,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [],
-      "repliesThisProcessReceived": [],
+      "repliesThisProcessIsWaitingOn": [
+        2,
+        3
+      ],
       "messagesThatWereInTransit": {
         "2": [
-          "REPLY 471 2",
-          "REQUEST 472 2"
+          "REPLY 453 2"
         ],
         "3": []
       }
     },
     "2": {
-      "time": 473,
+      "time": 454,
       "isInCriticalSection": false,
-      "wantsCriticalSection": true,
+      "wantsCriticalSection": false,
       "requestsThisProcessMustReplyTo": [],
-      "repliesThisProcessReceived": [],
+      "repliesThisProcessIsWaitingOn": [],
       "messagesThatWereInTransit": {
         "1": [],
         "3": []
       }
     },
     "3": {
-      "time": 471,
+      "time": 453,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [
-        {
-          "time": 469,
-          "processID": 1
-        }
-      ],
-      "repliesThisProcessReceived": [
         1
+      ],
+      "repliesThisProcessIsWaitingOn": [
+        2
       ],
       "messagesThatWereInTransit": {
         "1": [],
         "2": [
-          "REPLY 471 2",
-          "REQUEST 472 2"
+          "REPLY 453 2"
         ]
       }
     }

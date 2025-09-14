@@ -1,52 +1,49 @@
 {
   "snapshot": {
     "1": {
-      "time": 342,
+      "time": 1154,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": true,
+      "requestsThisProcessMustReplyTo": [
+        2
+      ],
+      "repliesThisProcessIsWaitingOn": [],
+      "messagesThatWereInTransit": {
+        "2": [],
+        "3": [
+          "REPLY 1155 3",
+          "REQUEST 1156 3"
+        ]
+      }
+    },
+    "2": {
+      "time": 1156,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [],
       "repliesThisProcessIsWaitingOn": [
-        2,
-        3
+        1
       ],
       "messagesThatWereInTransit": {
-        "2": [
-          "REPLY 344 2",
-          "REQUEST 345 2"
-        ],
-        "3": []
+        "1": [],
+        "3": [
+          "REPLY 1155 3",
+          "REQUEST 1156 3"
+        ]
       }
     },
-    "2": {
-      "time": 346,
+    "3": {
+      "time": 1157,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [],
       "repliesThisProcessIsWaitingOn": [
         1,
-        3
-      ],
-      "messagesThatWereInTransit": {
-        "1": [],
-        "3": []
-      }
-    },
-    "3": {
-      "time": 344,
-      "isInCriticalSection": false,
-      "wantsCriticalSection": true,
-      "requestsThisProcessMustReplyTo": [
-        1
-      ],
-      "repliesThisProcessIsWaitingOn": [
         2
       ],
       "messagesThatWereInTransit": {
         "1": [],
-        "2": [
-          "REPLY 344 2",
-          "REQUEST 345 2"
-        ]
+        "2": []
       }
     }
   }

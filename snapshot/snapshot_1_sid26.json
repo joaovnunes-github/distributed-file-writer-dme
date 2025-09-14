@@ -1,7 +1,7 @@
 {
   "snapshot": {
     "1": {
-      "time": 342,
+      "time": 935,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [],
@@ -11,14 +11,14 @@
       ],
       "messagesThatWereInTransit": {
         "2": [
-          "REPLY 344 2",
-          "REQUEST 345 2"
+          "REPLY 937 2",
+          "REQUEST 938 2"
         ],
         "3": []
       }
     },
     "2": {
-      "time": 346,
+      "time": 939,
       "isInCriticalSection": false,
       "wantsCriticalSection": true,
       "requestsThisProcessMustReplyTo": [],
@@ -32,20 +32,17 @@
       }
     },
     "3": {
-      "time": 344,
-      "isInCriticalSection": false,
-      "wantsCriticalSection": true,
+      "time": 938,
+      "isInCriticalSection": true,
+      "wantsCriticalSection": false,
       "requestsThisProcessMustReplyTo": [
         1
       ],
-      "repliesThisProcessIsWaitingOn": [
-        2
-      ],
+      "repliesThisProcessIsWaitingOn": [],
       "messagesThatWereInTransit": {
         "1": [],
         "2": [
-          "REPLY 344 2",
-          "REQUEST 345 2"
+          "REQUEST 938 2"
         ]
       }
     }
