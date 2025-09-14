@@ -1,0 +1,50 @@
+{
+  "snapshot": {
+    "1": {
+      "time": 367,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": true,
+      "requestsThisProcessMustReplyTo": [],
+      "repliesThisProcessReceived": [],
+      "messagesThatWereInTransit": {
+        "2": [
+          "REPLY 369 2",
+          "REQUEST 370 2"
+        ],
+        "3": []
+      }
+    },
+    "2": {
+      "time": 371,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": true,
+      "requestsThisProcessMustReplyTo": [],
+      "repliesThisProcessReceived": [],
+      "messagesThatWereInTransit": {
+        "1": [],
+        "3": []
+      }
+    },
+    "3": {
+      "time": 369,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": true,
+      "requestsThisProcessMustReplyTo": [
+        {
+          "time": 367,
+          "processID": 1
+        }
+      ],
+      "repliesThisProcessReceived": [
+        1
+      ],
+      "messagesThatWereInTransit": {
+        "1": [],
+        "2": [
+          "REPLY 369 2",
+          "REQUEST 370 2"
+        ]
+      }
+    }
+  }
+}

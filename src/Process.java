@@ -11,6 +11,21 @@ public class Process {
             networkClient.addMessageListener(accessManager);
             FileWriter writer = new FileWriter(accessManager);
 
+            if(config.getProcessID() == 1) {
+                Thread t = new Thread(() -> {
+                    while (true) {
+                        try {
+                            Thread.sleep(1000);
+                            accessManager.initiateSnapshot();
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                    }
+                });
+                t.setDaemon(true);
+                t.start();
+            }
+
             while (true) {
                 writer.write();
             }

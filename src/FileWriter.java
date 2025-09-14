@@ -34,4 +34,20 @@ public class FileWriter {
             Thread.sleep(10);
         }
     }
+
+    public void writeSnapshot(String json, int processID, int snapshotID) {
+        writeSnapshotInternal(json, processID, snapshotID);
+    }
+
+    private void writeSnapshotInternal(String json, int processID, Integer snapshotID) {
+        try {
+            Path dir = Paths.get("snapshot");
+            Files.createDirectories(dir);
+            String fileName = "snapshot_" + processID + "_sid" + snapshotID + ".json";
+            Path path = dir.resolve(fileName);
+            Files.writeString(path, json, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

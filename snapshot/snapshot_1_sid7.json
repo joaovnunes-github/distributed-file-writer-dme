@@ -1,0 +1,41 @@
+{
+  "snapshot": {
+    "1": {
+      "time": 275,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": true,
+      "requestsThisProcessMustReplyTo": [],
+      "repliesThisProcessReceived": [],
+      "messagesThatWereInTransit": {
+        "2": [
+          "REPLY 277 2"
+        ],
+        "3": [
+          "REPLY 279 3"
+        ]
+      }
+    },
+    "2": {
+      "time": 278,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": false,
+      "requestsThisProcessMustReplyTo": [],
+      "repliesThisProcessReceived": [],
+      "messagesThatWereInTransit": {
+        "1": [],
+        "3": []
+      }
+    },
+    "3": {
+      "time": 280,
+      "isInCriticalSection": false,
+      "wantsCriticalSection": false,
+      "requestsThisProcessMustReplyTo": [],
+      "repliesThisProcessReceived": [],
+      "messagesThatWereInTransit": {
+        "1": [],
+        "2": []
+      }
+    }
+  }
+}
